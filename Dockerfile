@@ -9,5 +9,5 @@ RUN chown -R $BUILD_USER ${BUILD_TOPDIR}/{SOURCES,SPECS}
 
 USER $BUILD_USER
 
-ENTRYPOINT ["/usr/bin/rpmbuild", "php7-pecl-redis.spec"]
+ENTRYPOINT ["/usr/bin/rpmbuild", "php7-pecl-mailparse.spec"]
 CMD ["-ba"]

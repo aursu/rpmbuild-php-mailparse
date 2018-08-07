@@ -127,7 +127,6 @@ done
 %check
 : Minimal load test for NTS extension
 %{__php} --no-php-ini \
-    --define extension=mbstring.so \
     --define extension=%{buildroot}%{php_extdir}/%{pecl_name}.so \
     --modules | grep %{pecl_name}
 
@@ -137,13 +136,11 @@ TEST_PHP_EXECUTABLE=%{__php} \
 NO_INTERACTION=1 \
 %{__php} run-tests.php \
     -n -q \
-    -d extension=mbstring.so \
     -d extension=$PWD/modules/%{pecl_name}.so
 
 %if %{with_zts}
 : Minimal load test for ZTS extension
 %{__ztsphp} --no-php-ini \
-    --define extension=mbstring.so \
     --define extension=%{buildroot}%{php_ztsextdir}/%{pecl_name}.so \
     --modules | grep %{pecl_name}
 
@@ -153,7 +150,6 @@ TEST_PHP_EXECUTABLE=%{__ztsphp} \
 NO_INTERACTION=1 \
 php run-tests.php \
     -n -q \
-    -d extension=mbstring.so \
     -d extension=$PWD/modules/%{pecl_name}.so
 %endif
 

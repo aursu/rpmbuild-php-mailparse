@@ -1,3 +1,13 @@
+# Fedora spec file for php-pecl-mailparse
+#
+# Copyright (c) 2008-2016 Remi Collet
+# Copyright (c) 2004-2007 Matthias Saou
+#
+# License: MIT
+# http://opensource.org/licenses/MIT
+#
+# Please, preserve the changelog entries
+#
 %{!?php_inidir:  %global php_inidir   %{_sysconfdir}/php.d}
 %{!?__pecl:      %global __pecl       %{_bindir}/pecl}
 %{!?__php:       %global __php        %{_bindir}/php}
@@ -7,21 +17,17 @@
 # After 20-mbstring
 %global ini_name  40-%{pecl_name}.ini
 
-
 Summary:   PHP PECL package for parsing and working with email messages
 Name:      php-pecl-mailparse
-Version:   2.1.6
-Release:   10%{?dist}
+Version:   3.0.2
+Release:   2%{?dist}
 License:   PHP
 Group:     Development/Languages
 URL:       http://pecl.php.net/package/mailparse
 Source0:   http://pecl.php.net/get/mailparse-%{version}.tgz
 
-# https://bugs.php.net/65861 - Please Provides LICENSE file
-# URL from mailparse.c header
-Source1:   http://www.php.net/license/2_02.txt
-
-BuildRequires: php-devel, php-pear
+BuildRequires: php-devel > 7
+BuildRequires: php-pear
 # mbstring need for tests
 BuildRequires: php-mbstring
 # Required by phpize
@@ -38,13 +44,11 @@ Provides: php-%{pecl_name}%{?_isa} = %{version}
 Provides: php-pecl(%{pecl_name}) = %{version}
 Provides: php-pecl(%{pecl_name})%{?_isa} = %{version}
 
-
 %if 0%{?fedora} < 20 && 0%{?rhel} < 7
 # Filter shared private
 %{?filter_provides_in: %filter_provides_in %{_libdir}/.*\.so$}
 %{?filter_setup}
 %endif
-
 
 %description
 Mailparse is an extension for parsing and working with email messages.
@@ -58,8 +62,12 @@ It can deal with rfc822 and rfc2045 (MIME) compliant messages.
 
 mv %{pecl_name}-%{version} NTS
 
+# Don't install/register tests
+sed -e 's/role="test"/role="src"/' \
+    -e '/LICENSE/s/role="doc"/role="src"/' \
+    -i package.xml
+
 cd NTS
-cp %{SOURCE1} LICENSE
 extver=$(sed -n '/#define PHP_MAILPARSE_VERSION/{s/.* "//;s/".*$//;p}' php_mailparse.h)
 if test "x${extver}" != "x%{version}"; then
    : Error: Upstream version is ${extver}, expecting %{version}.
@@ -110,11 +118,8 @@ install -Dpm 644 %{ini_name} %{buildroot}%{php_ztsinidir}/%{ini_name}
 # Install XML package description
 install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 
-# Test & Documentation
-for i in $(grep 'role="test"' package.xml | sed -e 's/^.*name="//;s/".*$//')
-do install -Dpm 644 NTS/$i %{buildroot}%{pecl_testdir}/%{pecl_name}/$i
-done
-for i in LICENSE $(grep 'role="doc"' package.xml | sed -e 's/^.*name="//;s/".*$//')
+# Documentation
+for i in $(grep 'role="doc"' package.xml | sed -e 's/^.*name="//;s/".*$//')
 do install -Dpm 644 NTS/$i %{buildroot}%{pecl_docdir}/%{pecl_name}/$i
 done
 
@@ -152,7 +157,6 @@ php run-tests.php \
     -d extension=$PWD/modules/%{pecl_name}.so
 %endif
 
-
 %post
 %{pecl_install} %{pecl_xmldir}/%{name}.xml >/dev/null || :
 
@@ -162,10 +166,9 @@ if [ $1 -eq 0 ] ; then
     %{pecl_uninstall} %{pecl_name} >/dev/null || :
 fi
 
-
 %files
+%license NTS/LICENSE
 %doc %{pecl_docdir}/%{pecl_name}
-%doc %{pecl_testdir}/%{pecl_name}
 %config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
 %{pecl_xmldir}/%{name}.xml
@@ -177,8 +180,32 @@ fi
 
 
 %changelog
-* Tue Aug  7 2018 Alexander Ursu <alexander.ursu@gmail.com> - 2.1.6-10
+* Tue Aug  7 2018 Alexander Ursu <alexander.ursu@gmail.com> - 3.0.2-2
 - Build for CentOS
+
+* Wed Dec  7 2016 Remi Collet <remi@fedoraproject.org> - 3.0.2-1
+- update to 3.0.2
+
+* Mon Nov 14 2016 Remi Collet <remi@fedoraproject.org> - 3.0.1-2
+- rebuild for https://fedoraproject.org/wiki/Changes/php71
+
+* Mon Jun 27 2016 Remi Collet <remi@fedoraproject.org> - 3.0.1-1
+- update to 3.0.1 for PHP 7
+- don't install tests
+- fix license installation
+
+* Wed Feb 10 2016 Remi Collet <remi@fedoraproject.org> - 2.1.6-13
+- drop scriptlets (replaced by file triggers in php-pear)
+- cleanup
+
+* Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 2.1.6-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
+* Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1.6-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
+* Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.1.6-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
 * Thu Jun 19 2014 Remi Collet <rcollet@redhat.com> - 2.1.6-9
 - rebuild for https://fedoraproject.org/wiki/Changes/Php56

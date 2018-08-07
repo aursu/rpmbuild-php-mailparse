@@ -25,6 +25,7 @@ License:   PHP
 Group:     Development/Languages
 URL:       http://pecl.php.net/package/mailparse
 Source0:   http://pecl.php.net/get/mailparse-%{version}.tgz
+Source1:   mailparse-%{version}-testdata.tgz
 
 BuildRequires: php-devel > 7
 BuildRequires: php-pear
@@ -58,7 +59,7 @@ It can deal with rfc822 and rfc2045 (MIME) compliant messages.
 %prep
 # We need to create our working directory since the package*.xml files from
 # the sources extract straight to it
-%setup -q -c
+%setup -q -c -a 1
 
 mv %{pecl_name}-%{version} NTS
 
@@ -125,6 +126,7 @@ done
 
 
 %check
+
 : Minimal load test for NTS extension
 %{__php} --no-php-ini \
     --define extension=%{buildroot}%{php_extdir}/%{pecl_name}.so \
@@ -132,6 +134,9 @@ done
 
 : Upstream test suite for NTS extension
 cd NTS
+# inconsistency in testdata
+rm -f tests/011.phpt
+
 TEST_PHP_EXECUTABLE=%{__php} \
 NO_INTERACTION=1 \
 %{__php} run-tests.php \
@@ -146,6 +151,9 @@ NO_INTERACTION=1 \
 
 : Upstream test suite for ZTS extension
 cd ../ZTS
+# inconsistency in testdata
+rm -f tests/011.phpt
+
 TEST_PHP_EXECUTABLE=%{__ztsphp} \
 NO_INTERACTION=1 \
 php run-tests.php \
